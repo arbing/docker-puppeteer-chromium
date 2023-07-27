@@ -48,6 +48,7 @@ RUN apt-get update \
   xdg-utils \
   dumb-init \
   procps \
+  iputils-ping \
   && apt-get clean
 
 COPY ./app /app
@@ -71,7 +72,7 @@ RUN <<-EOF
       && apt-get clean \
       && PUPPETEER_SKIP_DOWNLOAD=true npm install \
       && npm cache clean -force \
-      && echo "PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium" >> /etc/bash.bashrc; \
+      && echo "PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium" > ~/.npmrc; \
     elif [ "$TARGETPLATFORM" = "linux/amd64" ]; then \
       npm install \
       && npm cache clean -force; \
