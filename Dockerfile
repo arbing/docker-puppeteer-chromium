@@ -47,6 +47,7 @@ RUN apt-get update \
   wget \
   xdg-utils \
   dumb-init \
+  procps \
   && apt-get clean
 
 COPY ./app /app
@@ -59,15 +60,18 @@ ARG BUILDPLATFORM
 
 RUN echo "I am running on $BUILDPLATFORM, building for $TARGETPLATFORM, TARGETARCH=$TARGETARCH"
 
+# Install puppeteer and chromium binaries
+# linux/arm64
+#  https://snapshot.debian.org/binary/chromium/
 RUN <<-EOF
     if [ "$TARGETPLATFORM" = "linux/arm64" ]; then \
-      sh -c 'echo "deb http://snapshot.debian.org/archive/debian-security/20230721T050816Z bullseye-security main" >> /etc/apt/sources.list' \
+      echo "deb http://snapshot.debian.org/archive/debian-security/20230721T050816Z bullseye-security main" >> /etc/apt/sources.list \
       && apt-get -o Acquire::Check-Valid-Until=false update \
       && apt-get install -y --no-install-recommends chromium-common=115.0.5790.98-1~deb11u1 chromium=115.0.5790.98-1~deb11u1 \
       && apt-get clean \
       && PUPPETEER_SKIP_DOWNLOAD=true npm install \
       && npm cache clean -force \
-      && export PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium; \
+      && echo "PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium" >> /etc/bash.bashrc; \
     elif [ "$TARGETPLATFORM" = "linux/amd64" ]; then \
       npm install \
       && npm cache clean -force; \
